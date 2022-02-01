@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src='../vue.js'></script>
+<link rel="stylesheet" href="../openlayers/ol.css"/>
+<script type="text/javascript" src="../openlayers/ol.js"></script>
+<style>
+     .map {
+        width: 100%;
+        height:400px;
+      }
+      .mapcontainer {
+        position: relative;
+        margin-bottom: 20px;
+      }
+      .map {
+        width: 1000px;
+        height: 600px;
+      }
+      .map .ol-zoom {
+        top: 178px;
+        left: 158px;
+      }
+      .map .ol-rotate {
+        top: 178px;
+        right: 58px;
+      }
+      .map .ol-attribution,
+      .map .ol-attribution.ol-uncollapsible {
+        bottom: 30px;
+        right: 50px;
+      }
+      .padding-top {
+        position: absolute;
+        top: 0;
+        left: 0px;
+        width: 1000px;
+        height: 170px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .padding-left {
+        position: absolute;
+        top: 170px;
+        left: 0;
+        width: 150px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .padding-right {
+        position: absolute;
+        top: 170px;
+        left: 950px;
+        width: 50px;
+        height: 400px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .padding-bottom {
+        position: absolute;
+        top: 570px;
+        left: 0px;
+        width: 1000px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.5);
+      }
+      .center {
+        position: absolute;
+        border: solid 1px black;
+        top: 490px;
+        left: 560px;
+        width: 20px;
+        height: 20px;
+      }
+</style>
+<title>china</title>
+</head>
+<body>
+<div id="app">
+    div class="mapcontainer">
+      <div id="map" class="map"></div>
+      <div class="padding-top"></div>
+      <div class="padding-left"></div>
+      <div class="padding-right"></div>
+      <div class="padding-bottom"></div>
+      <div class="center"></div>
+    </div>
+    <button id="zoomtoswitzerland">Zoom to Switzerland</button> (best fit).<br/>
+    <button id="zoomtolausanne">Zoom to Lausanne</button> (with min resolution),<br/>
+    <button id="centerlausanne">Center on Lausanne</button>
+  
+   
+    
+</div>
+   <script>
+       //阻止vue在启动时生成出产提示。
+       Vue.config.productionTip=false
+       
+
+
+
+       const app=new Vue({
+           el:'#app',
+           data:{
+               firstName:'张',
+               lastName:'三'
+             
+
+           },
+           methods:{
+               begin: function(){
+                   console.log('hello');
+               }
+              
+              
+           },
+           mounted(){
+
+
+              const source=new ol.source.Vector({
+                  url:'https://openlayers.org/en/latest/examples/data/geojson/switzerland.geojson',
+                  format:new ol.format.GeoJSON(),
+
+              });
+              console.log(source);
+
+              const style = new ol.style.Style({
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.6)',
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#319FD3',
+                        width: 1,
+                    }),
+                    image: new ol.style.Circle({
+                        radius: 5,
+                        fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 255, 0.6)',
+                        }),
+                        stroke: new ol.style.Stroke({
+                        color: '#319FD3',
+                        width: 1,
+                        }),
+                    }),
+              });
+              const vectorLayer = new ol.layer.Vector({
+                    source: source,
+                    style: style,
+              });
+              const view = new ol.View({
+                    center: [0, 0],
+                    zoom: 1,
+              });
+              const map = new ol.Map({
+                layers: [
+                    new ol.layer.Tile({
+                    source: new ol.source.OSM(),
+                    }),
+                    vectorLayer,
+                ],
+                target: 'map',
+                view: view,
+              });
+                // const map = new ol.Map({
+                //     layers: [
+                //     new ol.layer.Tile({
+                //         source: new ol.source.OSM(),
+                //     }),
+                //     ],
+                //     target: 'map',
+                //     view: new ol.View({
+                //         center: [0, 0],
+                //         zoom: 2,
+                //     }),
+                // });
+
+
+                const zoomtoswitzerland = document.getElementById('zoomtoswitzerland');
+                zoomtoswitzerland.addEventListener(
+                'click',
+                function () {
+                    const feature = source.getFeatures()[0];
+                    const polygon = feature.getGeometry();
+                    view.fit(polygon, {padding: [170, 50, 30, 150]});
+                },
+                false
+                );
+
+                const zoomtolausanne = document.getElementById('zoomtolausanne');
+                zoomtolausanne.addEventListener(
+                'click',
+                function () {
+                    const feature = source.getFeatures()[1];
+                    const point = feature.getGeometry();
+                    view.fit(point, {padding: [170, 50, 30, 150], minResolution: 50});
+                },
+                false
+                );
+
+                const centerlausanne = document.getElementById('centerlausanne');
+                centerlausanne.addEventListener(
+                'click',
+                function () {
+                    const feature = source.getFeatures()[1];
+                    const point = feature.getGeometry();
+                    const size = map.getSize();
+                    view.centerOn(point.getCoordinates(), size, [570, 500]);
+                },
+                false
+                );
+
+                this.begin();
+                
+               
+
+           }
+          
+
+       })    
+      
+   </script>
+</body>
+</html>
